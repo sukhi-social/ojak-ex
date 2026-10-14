@@ -166,21 +166,25 @@ Tests: `mix test`.
 
 ## Thanks
 
-This is a thin layer on other people's work, and it is theirs more than ours.
+We use this, and we like keeping it in good shape. These made that easy and
+pleasant, and we are grateful for them.
 
-- **[Ojak](https://github.com/eunha-space/ojak)** does the real work: the
-  signature and JSON-LD crates that everything here wraps.
-- **[Feder](https://github.com/fedify-dev/feder)** for the way of splitting
-  protocol decisions, as functions of the facts they are given, from the
-  platform around them. This follows it.
-- **[Fedify](https://fedify.dev)** for the behaviour that servers expect, and
-  for the output we checked against. A lot of "does this agree with the
-  fediverse" was answered by its fixtures.
-- **[Elixir](https://elixir-lang.org)** and Erlang/OTP under it, which this is
-  for: the VM, the dirty schedulers that let a NIF do slow work politely, and
-  `:httpc` and `:public_key`, which fetch and check the prebuilt library.
-- **[Rustler](https://github.com/rusterlium/rustler)**, which makes writing a
-  NIF in Rust safe enough to be worth doing.
+- **[Ojak](https://github.com/eunha-space/ojak)**: its signature and JSON-LD
+  crates are clear enough to build on. Pinning one commit just worked, and we
+  can follow its changes at our own pace.
+- **[Feder](https://github.com/fedify-dev/feder)**: for the way of keeping
+  protocol decisions as functions of the facts they are given, apart from the
+  platform around them. It tells us where a change belongs.
+- **[Fedify](https://fedify.dev)**: for the behaviour servers expect, and for
+  the fixtures we check against. Because of them we can change things without
+  worrying whether we still agree with the fediverse.
+- **[Elixir](https://elixir-lang.org)** and Erlang/OTP: for the VM, the dirty
+  schedulers that let a NIF do slow work politely, and `:httpc` and
+  `:public_key`, which are all the build needs to fetch and check a prebuilt
+  library. No extra dependencies.
+- **[Rustler](https://github.com/rusterlium/rustler)**: the NIF boundary stays
+  regular and readable, so adding a function touches the same few places every
+  time.
 
 And thanks to everyone who writes down how the fediverse works, so that the
 rest of us can read it.
