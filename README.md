@@ -108,27 +108,36 @@ documents its own options.
 
 ## Install
 
-There is no Hex package yet, and a `github:` dependency does not work (the
-build needs the whole repository). Clone it and point at the Mix project:
-
 ```elixir
-{:ojak, path: "../ojak-ex/crates/ojak-nif/elixir"}
+{:ojak, github: "sukhi-social/ojak-ex", tag: "v0.1.1"}
 ```
 
-You need a Rust toolchain (1.95 or newer; `rust-toolchain.toml` pins 1.97.1)
-wherever you build: `mix compile` runs `cargo build --release`. The libraries
-attached to the [releases](https://github.com/sukhi-social/ojak-ex/releases)
-are built for Linux (gnu and musl, x86_64 and aarch64), but nothing downloads
-them yet.
+On Linux (x86_64 or aarch64, glibc or musl), `mix deps.compile` downloads the
+library built for that platform from the GitHub release and uses it if its
+SHA-256 matches the one published beside it. You do not need Rust. Anywhere
+else, or if the download fails, it builds with `cargo`, which needs Rust 1.95
+or newer (`rust-toolchain.toml` pins 1.97.1). It says which one it did.
 
-Tests: `cd crates/ojak-nif/elixir && mix test`.
+The checksum comes from the same release as the library, so it catches a
+broken download, not a tampered release. If you want to know what the library
+was built from, set `OJAK_NIF_BUILD=1` and build it yourself. Other switches
+are in `mix help ojak_nif.build`.
+
+To work on ojak-ex itself, clone it. A clone, or a `path:` dependency, always
+builds from source, so your changes to the Rust are not hidden by a download.
+
+```elixir
+{:ojak, path: "../ojak-ex"}
+```
+
+Tests: `mix test`.
 
 ## Before you use it
 
 - **Licence: AGPL-3.0-only**, as ojak's. What that means for an application
   that loads this is for you to decide.
-- **Tested** on macOS arm64 and on Linux (all four targets above) with Elixir
-  1.20 and OTP 28; the first version of the package was tried on Elixir 1.14 and
+- **Tested** on macOS arm64 and on Linux (x86_64 and aarch64, glibc and musl)
+  with Elixir 1.20 and OTP 28; the first version of the package was tried on Elixir 1.14 and
   OTP 25. Not tried: Windows.
 - **Checked against Fedify's output, not yet against live servers.** In a trial
   in [sukhi-fedi](https://github.com/sukhi-social/sukhi-fedi), Ojak verified
@@ -154,3 +163,24 @@ Tests: `cd crates/ojak-nif/elixir && mix test`.
   PGO build (which turned out to be a small gain at best).
 - [crates/ojak-nif/README.md](crates/ojak-nif/README.md): the layout, and the
   modules in more detail.
+
+## Thanks
+
+This is a thin layer on other people's work, and it is theirs more than ours.
+
+- **[Ojak](https://github.com/eunha-space/ojak)** does the real work: the
+  signature and JSON-LD crates that everything here wraps.
+- **[Feder](https://github.com/fedify-dev/feder)** for the way of splitting
+  protocol decisions, as functions of the facts they are given, from the
+  platform around them. This follows it.
+- **[Fedify](https://fedify.dev)** for the behaviour that servers expect, and
+  for the output we checked against. A lot of "does this agree with the
+  fediverse" was answered by its fixtures.
+- **[Elixir](https://elixir-lang.org)** and Erlang/OTP under it, which this is
+  for: the VM, the dirty schedulers that let a NIF do slow work politely, and
+  `:httpc` and `:public_key`, which fetch and check the prebuilt library.
+- **[Rustler](https://github.com/rusterlium/rustler)**, which makes writing a
+  NIF in Rust safe enough to be worth doing.
+
+And thanks to everyone who writes down how the fediverse works, so that the
+rest of us can read it.

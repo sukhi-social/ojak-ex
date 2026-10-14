@@ -17,9 +17,24 @@ permissions:
   contents: read
 
 jobs:
+  # A tag has to name the version in mix.exs, because the library to download
+  # is found by that version.
+  version:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: The tag matches mix.exs
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          grep -q "version: \"${GITHUB_REF_NAME#v}\"" mix.exs || {
+            echo "tag $GITHUB_REF_NAME does not match the version in mix.exs" >&2
+            exit 1
+          }
+
   # glibc 2.35 or newer (Ubuntu 22.04). Built on the oldest glibc we ask for,
   # so that anything newer can load it.
   gnu:
+    needs: version
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -46,6 +61,7 @@ jobs:
   # Alpine (musl). The build runs in a container started by hand, because the
   # JavaScript actions the runner brings do not run inside Alpine.
   musl:
+    needs: version
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -89,3 +105,40 @@ jobs:
           ls -l dist
           gh release create "$GITHUB_REF_NAME" dist/* \
             --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
+
+  # Depend on the release from GitHub as a user does, with no Rust on the
+  # PATH, and use it.
+  install:
+    name: install (${{ matrix.name }})
+    needs: release
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: x86_64 gnu, runner: ubuntu-22.04 }
+          - { name: aarch64 gnu, runner: ubuntu-22.04-arm }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
+        with:
+          otp-version: "28"
+          elixir-version: "1.20"
+      - run: scripts/ci-install-check.sh "$GITHUB_REF_NAME"
+
+  install-musl:
+    name: install (${{ matrix.name }})
+    needs: release
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: x86_64 musl, runner: ubuntu-22.04 }
+          - { name: aarch64 musl, runner: ubuntu-22.04-arm }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: In elixir:1.20-alpine
+        run: |
+          docker run --rm -v "$PWD":/work -w /work elixir:1.20-alpine \
+            sh -ec 'apk add --no-cache git && scripts/ci-install-check.sh "'"$GITHUB_REF_NAME"'"'

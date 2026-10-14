@@ -21,7 +21,7 @@ cd "$root"
 
 host=$(rustc -vV | sed -n 's/^host: //p')
 target=${1:-$host}
-elixir_dir=$root/crates/ojak-nif/elixir
+elixir_dir=$root
 data=$root/target/pgo-data/$target
 merged=$root/target/pgo-data/$target.profdata
 

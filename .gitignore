@@ -1,6 +1,7 @@
 target/
 _build/
 deps/
+/priv/
+dist/
 erl_crash.dump
 *.ez
-dist/

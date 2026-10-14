@@ -12,7 +12,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 
 target=${1:?usage: ci-prebuild.sh TARGET}
 lib=libojak_nif-$target.so
-elixir_dir=$root/crates/ojak-nif/elixir
+elixir_dir=$root
 mkdir -p target dist/baseline
 
 sha256sum_of() {

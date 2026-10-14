@@ -593,7 +593,7 @@ dependencies = [
 
 [[package]]
 name = "ojak-nif"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ojak-nif-core",
  "ojak-sig",
@@ -603,7 +603,7 @@ dependencies = [
 
 [[package]]
 name = "ojak-nif-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "getrandom 0.4.3",
  "ojak-jsonld",

@@ -11,7 +11,6 @@ on a `v*` tag, attaches them to a release with their `.sha256`:
 | aarch64-unknown-linux-musl | `elixir:1.20-alpine` on arm |
 
 By hand ("Run workflow") the libraries are only kept as workflow artifacts.
-Nothing downloads them yet: `mix compile` still runs `cargo build`.
 
 ## How the profile is made
 
@@ -79,4 +78,4 @@ it is worth the second build is for you to decide from your own summaries.
 - A `v*` tag, so the `release` job has not run.
 - A library from here loaded into a real application (only the tests did).
 - Nothing signs the libraries; the `.sha256` only catches a bad download.
-- Nothing downloads them yet: `mix compile` still runs `cargo build`.
+- The download from a real GitHub release on Linux, until a tagged release that carries `mix.exs` exists (it is checked locally against a web server by `scripts/test-prebuilt.sh`).

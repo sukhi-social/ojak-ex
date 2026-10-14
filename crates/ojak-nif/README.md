@@ -119,13 +119,14 @@ What follows is what has not been done or has not been checked, stated plainly.
 
 ### Building and running
 
- -  **There is no precompiled library and no Hex package.**  `mix compile`
-    runs `cargo build --release`, so a Rust toolchain is needed wherever you
-    build.  The Rustler Elixir package is not used (it could not be fetched
-    where this was written), so the library is loaded by this project's own
-    `Ojak.Nif.load_nif/0` and built by its own `ojak_nif.build` Mix task.  How
-    to depend on it from another project is not worked out; start from a
-    `path:` dependency.
+ -  **There is no Hex package.**  Depend on it from GitHub (see the README at
+    the root of the repository).  On Linux the library is downloaded from the
+    release and checked against its SHA-256; elsewhere, or if that fails,
+    `mix compile` runs `cargo build --release`, so a Rust toolchain is needed.
+    The Rustler Elixir package is not used (it could not be fetched where this
+    was written), so the library is loaded by this project's own
+    `Ojak.Nif.load_nif/0` and put in `priv/` by its own `ojak_nif.build` Mix
+    task.
  -  **Slow calls use the dirty CPU schedulers**, which are as many as the CPUs.
     A flood of large bodies can fill them.  Bound the size of what you accept
     before you hand it over.
@@ -142,11 +143,10 @@ Layout
  -  *../ojak-nif-core*: What they do, in plain Rust, tested by `cargo test`.
     It is apart because a library that calls `enif_*` cannot be linked into a
     test binary.
- -  *elixir*: The Mix project, and *elixir/test*, which tests the whole through
-    a real VM:
+ -  The Mix project is at the root of the repository (*mix.exs*, *lib*,
+    *test*), and tests the whole through a real VM:
 
     ~~~~ sh
-    cd crates/ojak-nif/elixir
     mix test
     ~~~~
 
