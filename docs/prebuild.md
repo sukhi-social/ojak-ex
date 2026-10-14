@@ -30,14 +30,32 @@ Try it here: `rustup component add llvm-tools`, then
 
 ## Does it help?
 
-Not shown. On Apple silicon (aarch64-apple-darwin) the PGO library, a
-baseline with the same flags, and a plain `cargo build --release` all ran
-within 1 to 2 percent of each other, which is the noise. Most of the time
-goes to RSA arithmetic, which is already tight.
+A little, and not everywhere. On Apple silicon (aarch64-apple-darwin), median
+of five runs, repeated twice with the same result:
 
-So each job builds both and writes the speed of both to its summary
-(`scripts/ci-prebuild.sh`), on another workload than the one the profile came
-from. Read it before trusting the build.
+| | plain `cargo build --release` | fat LTO, 1 unit | + PGO |
+|---|---|---|---|
+| proof verify | 0.0688 ms | 0.0638 | 0.0598 |
+| JSON-LD normalize | 0.0801 | 0.0729 | 0.0688 |
+| LD verify | 0.3537 | 0.3480 | 0.3216 |
+| HTTP sign (RSA) | 0.7192 | 0.7126 | 0.7502 |
+
+The flags give 5 to 8 percent on the small calls. The profile moves things by
+a few percent either way, and the direction changes a little each time the
+library is rebuilt: in two Mac builds the small calls (proofs, JSON-LD) were 1
+to 7 percent faster and the RSA calls 2 to 7 percent slower. RSA is bignum
+arithmetic and was already tight. Read this as "PGO is a wash here", not as a
+gain.
+
+An earlier version of the benchmark compared the same library with itself:
+`mix run --no-compile` still ran the compile alias, which copied the plain
+build over `priv/`. `scripts/ci-prebuild.sh` now compiles the Elixir files by
+hand and runs `elixir -pa`, and prints the checksum of each library it
+measures.
+
+Each CI job builds both and writes the speed of both to its summary, on
+another workload than the one the profile came from. Read it before trusting
+the build.
 
 ## Not checked
 

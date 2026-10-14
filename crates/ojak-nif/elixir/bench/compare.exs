@@ -1,7 +1,8 @@
 # A speed check that is not the PGO workload: other documents, one process,
-# the median of five runs. Put the library to try in priv/ojak_nif.so, then
+# the median of five runs. Run by scripts/ci-prebuild.sh, which puts the
+# library to try where `elixir -pa` finds it:
 #
-#     mix run --no-start --no-compile bench/compare.exs
+#     elixir -pa target/compare-app/ojak/ebin bench/compare.exs
 alias Ojak.{HTTPSignature, JsonLd, Key, LinkedDataSignature, Proof}
 
 alice = "https://other.example/users/carol"

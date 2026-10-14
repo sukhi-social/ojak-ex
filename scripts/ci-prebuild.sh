@@ -15,16 +15,29 @@ lib=libojak_nif-$target.so
 elixir_dir=$root/crates/ojak-nif/elixir
 mkdir -p target dist/baseline
 
+sha256sum_of() {
+  if command -v sha256sum > /dev/null; then sha256sum "$1" | cut -c1-12; else shasum -a 256 "$1" | cut -c1-12; fi
+}
+
 OJAK_PGO=0 scripts/pgo-build.sh "$target"
 mv "dist/$lib" "dist/$lib.sha256" dist/baseline/
 scripts/pgo-build.sh "$target"
 
 # Another workload than the one the profile came from, so that a gain is not
 # just the build remembering its lesson.
+#
+# This does not go through Mix: its compile alias runs `cargo build` and copies
+# the plain library over priv/, which would make both runs measure the same
+# library. The Elixir files are compiled by hand into a directory shaped like
+# an application (ebin/ and priv/), and `elixir -pa` runs the benchmark.
+app=$root/target/compare-app/ojak
+rm -rf "$app" && mkdir -p "$app/ebin" "$app/priv"
+elixirc -o "$app/ebin" $(find "$elixir_dir/lib" -name '*.ex')
 for which in baseline pgo; do
   if [ "$which" = baseline ]; then from=dist/baseline/$lib; else from=dist/$lib; fi
-  cp "$from" "$elixir_dir/priv/ojak_nif.so"
-  (cd "$elixir_dir" && mix run --no-start --no-compile bench/compare.exs) > "target/compare-$which.txt"
+  cp "$from" "$app/priv/ojak_nif.so"
+  echo "$which: $(sha256sum_of "$app/priv/ojak_nif.so")"
+  elixir -pa "$app/ebin" "$elixir_dir/bench/compare.exs" > "target/compare-$which.txt"
 done
 
 {
