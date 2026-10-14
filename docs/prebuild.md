@@ -57,9 +57,26 @@ Each CI job builds both and writes the speed of both to its summary, on
 another workload than the one the profile came from. Read it before trusting
 the build.
 
+## What CI showed (run 38530432203, workflow_dispatch)
+
+All four targets built, ran the profile workload, and passed the 57 Elixir
+tests on both the baseline and the PGO library. That includes the musl
+targets inside `elixir:1.20-alpine` and the arm runner with `setup-beam`. One
+run each, on shared runners, so a few percent is noise.
+
+| target | where PGO helped | where it did not |
+|---|---|---|
+| x86_64 gnu | most calls, 4 to 6 percent faster | proof sign, +1 |
+| aarch64 gnu | LD verify, proofs, JSON-LD: 2 to 8 percent faster | RSA sign, +1 |
+| aarch64 musl | LD verify, JSON-LD: 3 to 4 percent faster | RSA sign, +1 |
+| x86_64 musl | LD verify, proofs, JSON-LD: 1 to 3 percent faster | RSA sign and verify, 4 to 7 percent slower |
+
+So: a small gain on the JSON and proof paths, none or a loss on RSA. Whether
+it is worth the second build is for you to decide from your own summaries.
+
 ## Not checked
 
-- The workflow has not run on GitHub.
-- Profiling on musl, and `erlef/setup-beam` on the arm runner, are untested.
-- Whether a musl library built this way loads in `elixir:1.20-alpine`.
+- A `v*` tag, so the `release` job has not run.
+- A library from here loaded into a real application (only the tests did).
 - Nothing signs the libraries; the `.sha256` only catches a bad download.
+- Nothing downloads them yet: `mix compile` still runs `cargo build`.
