@@ -3,7 +3,10 @@ defmodule Mix.Tasks.OjakNif.Build do
   @moduledoc """
   Builds the `ojak-nif` crate and puts the library where `Ojak.Nif` loads it
   from. `OJAK_NIF_PROFILE=debug` builds without optimisation, which is faster
-  to build and far slower to run; RSA in particular.
+  to build and far slower to run; RSA in particular. `OJAK_NIF_TARGET` names a
+  Rust target triple to build for (`cargo build --target`); build scripts and
+  procedural macros are then built without the flags in `RUSTFLAGS`, which is
+  what a profile-guided build needs (see *scripts/pgo-build.sh*).
   """
   use Mix.Task
 
@@ -12,6 +15,8 @@ defmodule Mix.Tasks.OjakNif.Build do
     profile = System.get_env("OJAK_NIF_PROFILE", "release")
     workspace = Path.expand("../../..", __DIR__)
     flags = if profile == "release", do: ["--release"], else: []
+    target = System.get_env("OJAK_NIF_TARGET")
+    flags = if target, do: flags ++ ["--target", target], else: flags
 
     {_, status} =
       System.cmd("cargo", ["build", "-p", "ojak-nif" | flags],
@@ -22,7 +27,7 @@ defmodule Mix.Tasks.OjakNif.Build do
     if status != 0, do: Mix.raise("cargo build failed (#{status})")
 
     ext = if match?({:unix, :darwin}, :os.type()), do: "dylib", else: "so"
-    built = Path.join([workspace, "target", profile, "libojak_nif.#{ext}"])
+    built = Path.join([workspace, "target"] ++ List.wrap(target) ++ [profile, "libojak_nif.#{ext}"])
     priv = Path.join(__DIR__, "priv")
     File.mkdir_p!(priv)
     # The BEAM loads `priv/ojak_nif` and finds the `.so` whatever the platform
