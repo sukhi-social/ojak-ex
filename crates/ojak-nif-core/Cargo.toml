@@ -1,0 +1,19 @@
+[package]
+name = "ojak-nif-core"
+description = "What ojak-nif does, in plain Rust, so that it can be tested without a BEAM"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+ojak-jsonld.workspace = true
+ojak-sig.workspace = true
+# The system's randomness, for the keys made here; the time is always the
+# caller's.
+getrandom = { version = "0.4", features = ["sys_rng"] }
+rand_core = "0.10"
+serde_json.workspace = true
+
+[lints]
+workspace = true

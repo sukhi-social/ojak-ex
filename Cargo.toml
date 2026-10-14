@@ -1,0 +1,20 @@
+[workspace]
+members = ["crates/ojak-nif", "crates/ojak-nif-core"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-only"
+
+[workspace.dependencies]
+# ojak is held at one commit: the ojak-nif branch of sukhi-social/ojak.
+ojak-jsonld = { git = "https://github.com/sukhi-social/ojak", rev = "83bdba1399a044e37fbad1baf4ad8daf7fe5cabd" }
+ojak-sig = { git = "https://github.com/sukhi-social/ojak", rev = "83bdba1399a044e37fbad1baf4ad8daf7fe5cabd" }
+serde_json = "1.0.140"
+
+[workspace.lints.rust]
+warnings = "deny"
+
+[workspace.lints.clippy]
+all = "deny"

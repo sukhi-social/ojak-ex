@@ -1,0 +1,25 @@
+[package]
+name = "ojak-nif"
+description = "Ojak's signatures and JSON-LD, as an Erlang NIF library for Elixir"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+name = "ojak_nif"
+crate-type = ["cdylib"]
+# The BEAM supplies the `enif_*` functions this calls, so a test binary of
+# its own cannot link. What can be tested without a VM is in ojak-nif-core;
+# the Elixir tests under *elixir/test* test this.
+test = false
+doctest = false
+
+[dependencies]
+ojak-nif-core = { path = "../ojak-nif-core" }
+ojak-sig.workspace = true
+rustler = "0.39"
+serde_json.workspace = true
+
+[lints]
+workspace = true
