@@ -138,6 +138,7 @@ defmodule Mix.Tasks.OjakNif.Build do
   end
 
   defp fetch(url) do
+    ensure_otp_apps()
     {:ok, _} = Application.ensure_all_started(:inets)
     {:ok, _} = Application.ensure_all_started(:ssl)
 
@@ -151,6 +152,22 @@ defmodule Mix.Tasks.OjakNif.Build do
     end
   rescue
     error -> {:error, Exception.message(error)}
+  end
+
+  # Mix prunes OTP applications that the project does not list from the code
+  # path (since Elixir 1.15), and an earlier dependency's compile can leave it
+  # that way, so `:public_key` and friends may be "not available" here even
+  # though they are installed. Put them back before they are called.
+  defp ensure_otp_apps do
+    lib = Path.join(List.to_string(:code.root_dir()), "lib")
+
+    for app <- ~w(crypto asn1 public_key ssl inets)a,
+        match?({:error, _}, :code.lib_dir(app)),
+        ebin <- Path.wildcard(Path.join([lib, "#{app}-*", "ebin"])) do
+      Code.prepend_path(ebin)
+    end
+
+    :ok
   end
 
   # The system's certificate authorities (OTP 25 and newer), and the name the
