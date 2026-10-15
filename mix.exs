@@ -223,7 +223,7 @@ defmodule OjakNif.MixProject do
   def project do
     [
       app: :ojak,
-      version: "0.1.1",
+      version: "0.1.2",
       elixir: "~> 1.14",
       deps: [],
       aliases: [compile: ["ojak_nif.build", "compile"]],
