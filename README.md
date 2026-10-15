@@ -109,7 +109,7 @@ documents its own options.
 ## Install
 
 ```elixir
-{:ojak, github: "sukhi-social/ojak-ex", tag: "v0.1.1"}
+{:ojak, github: "sukhi-social/ojak-ex", tag: "v0.1.2"}
 ```
 
 On Linux (x86_64 or aarch64, glibc or musl), `mix deps.compile` downloads the
