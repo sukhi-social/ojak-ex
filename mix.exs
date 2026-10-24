@@ -145,7 +145,9 @@ defmodule Mix.Tasks.OjakNif.Build do
     options = [timeout: 60_000, connect_timeout: 15_000, autoredirect: true, ssl: ssl_options()]
     request = {String.to_charlist(url), [{~c"user-agent", ~c"ojak-ex"}]}
 
-    case :httpc.request(:get, request, options, body_format: :binary) do
+    # OTP 29 caps response headers at 10 KB by default. GitHub's redirect for
+    # release assets is now larger than that, so the prebuilt download fails.
+    case :httpc.request(:get, request, options, body_format: :binary, max_header_size: 65_536) do
       {:ok, {{_, 200, _}, _headers, body}} -> {:ok, body}
       {:ok, {{_, status, _}, _headers, _body}} -> {:error, {:http, status}}
       {:error, reason} -> {:error, reason}
@@ -223,7 +225,7 @@ defmodule OjakNif.MixProject do
   def project do
     [
       app: :ojak,
-      version: "0.1.2",
+      version: "0.1.3",
       elixir: "~> 1.14",
       deps: [],
       aliases: [compile: ["ojak_nif.build", "compile"]],
